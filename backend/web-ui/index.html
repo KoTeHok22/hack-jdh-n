@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hypothesis Factory</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <i class="logo" data-lucide="plus-circle" style="color:#0077bc;width:32px;height:32px;"></i>
+      <h1 class="sidebar-title">Hypothesis Factory</h1>
+    </div>
+
+    <nav class="nav">
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Главная</span>
+      </a>
+      <a href="#" class="nav-item" data-page="docs">
+        <i data-lucide="file-text"></i>
+        <span>Документы</span>
+      </a>
+      <a href="#" class="nav-item" data-page="hypotheses">
+        <i data-lucide="star"></i>
+        <span>Гипотезы</span>
+      </a>
+      <a href="#" class="nav-item" data-page="graph">
+        <i data-lucide="bar-chart-3"></i>
+        <span>Граф</span>
+      </a>
+      <a href="#" class="nav-item" data-page="export">
+        <i data-lucide="download"></i>
+        <span>Экспорт</span>
+      </a>
+    </nav>
+  </div>
+
+  <main class="main">
+    
+    <header class="header active" data-header-for="dashboard">
+      <div>
+        <h1 class="header-title">Загрузка документов и генерация гипотез</h1>
+        <p class="header-subtitle">Загрузите корпус, сформулируйте проблему — получите ранжированные гипотезы за минуты вместо недель.</p>
+      </div>
+    </header>
+
+    
+    <header class="header" data-header-for="docs">
+      <div>
+        <h1 class="header-title">Загруженные документы</h1>
+        <p class="header-subtitle">Все распознанные и проиндексированные источники корпуса — состояние OCR, количество страниц, привязка к гипотезам.</p>
+      </div>
+      <div class="btn-row" style="margin:0;">
+        <button class="btn btn-ghost" id="docsRefreshBtn">
+          <i data-lucide="refresh-cw"></i>
+          Обновить
+        </button>
+        <button class="btn btn-primary" data-jump="dashboard">Загрузить ещё</button>
+      </div>
+    </header>
+
+    
+    <header class="header" data-header-for="hypotheses">
+      <div>
+        <h1 class="header-title">Сгенерированные гипотезы</h1>
+        <p class="header-subtitle">Ранжированный список гипотез с оценками новизны, реализуемости и эффекта.</p>
+      </div>
+      <div class="btn-row" style="margin:0;">
+        <button class="btn btn-ghost" data-jump="graph">Открыть граф</button>
+        <button class="btn btn-primary">Экспорт CSV</button>
+      </div>
+    </header>
+
+    
+    <header class="header" data-header-for="graph">
+      <div>
+        <h1 class="header-title">Граф знаний</h1>
+        <p class="header-subtitle">Семантические связи между сущностями, понятиями и гипотезами в загруженном корпусе.</p>
+      </div>
+    </header>
+
+    
+    <header class="header" data-header-for="export">
+      <div>
+        <h1 class="header-title">Экспорт результатов</h1>
+        <p class="header-subtitle">Скачайте гипотезы, оценки и ход рассуждений в одном из форматов для дальнейшего анализа.</p>
+      </div>
+    </header>
+
+    
+    <section class="page active" id="page-dashboard">
+
+      <div class="flow-steps">
+        <div class="flow-step active"><div class="flow-number">1</div><div class="flow-text">Загрузка документов</div></div>
+        <div class="flow-step"><div class="flow-number">2</div><div class="flow-text">Формулировка проблемы</div></div>
+        <div class="flow-step"><div class="flow-number">3</div><div class="flow-text">Генерация гипотез</div></div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Документов загружено</div>
+          <div class="stat-value" id="docsCountStat">—</div>
+          <div class="stat-trend" id="docsTrend"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Запусков генерации</div>
+          <div class="stat-value" id="runsCountStat">—</div>
+          <div class="stat-trend" id="runsTrend"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Гипотез сгенерировано</div>
+          <div class="stat-value" id="hypsCountStat">—</div>
+          <div class="stat-trend" id="hypsTrend"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">OCR-провайдеров</div>
+          <div class="stat-value" id="ocrCountStat">0</div>
+          <div class="stat-trend" id="ocrTrend">доступно</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">
+            <span class="card-title-icon primary">
+              <i data-lucide="upload"></i>
+            </span>
+            Загрузка документов
+          </div>
+
+          <div class="dropzone" id="upload-dropzone">
+            <i data-lucide="upload" style="width:40px;height:40px;"></i>
+            <p class="dropzone-title">Перетащите файлы сюда или кликните</p>
+            <p class="dropzone-sub">PDF, DOCX, XLSX, CSV, TXT, MD · до 200 МБ на файл</p>
+            <input type="file" id="file-input" multiple accept=".pdf,.docx,.xlsx,.csv,.txt,.md" style="display:none;">
+          </div>
+          <div class="file-list" id="file-list" style="display:none;"></div>
+
+          <div class="form-group">
+            <label class="form-label">Тип документа</label>
+            <select id="doc-type">
+              <option value="textbook">Учебник</option>
+              <option value="report">Научный отчёт</option>
+              <option value="patent">Патент</option>
+              <option value="technical">Техническая документация</option>
+              <option value="other">Другое</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">OCR-провайдер</label>
+            <select id="ocr-provider">
+              <option value="auto">Авто (определит система)</option>
+              <option value="mistral">Mistral OCR</option>
+              <option value="glm">GLM-OCR</option>
+              <option value="paddle">PaddleOCR</option>
+            </select>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="upload-btn" disabled>
+              <i data-lucide="upload"></i>
+              Загрузить и индексировать
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span class="card-title-icon accent">
+              <i data-lucide="sparkles"></i>
+            </span>
+            Генерация гипотез
+          </div>
+
+          <div class="form-group">
+            <label for="problem-text" class="form-label">Формулировка проблемы</label>
+            <textarea class="textarea" id="problem-text" rows="4" placeholder="Например: увеличить извлечение никеля из пентландита на 15–20% без капитальных затрат…"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="hypothesis-count" class="form-label">Количество гипотез</label>
+            <input class="input" id="hypothesis-count" type="number" min="3" max="15" value="8" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Режим стратегии поиска</label>
+            <select id="strategy" class="select">
+              <option value="auto">Авто</option>
+              <option value="novelty">Максимальная новизна</option>
+              <option value="feasibility">Максимальная реализуемость</option>
+              <option value="impact">Максимальный эффект</option>
+              <option value="balanced">Сбалансированный</option>
+            </select>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-accent" id="generate-btn">
+              <i data-lucide="sparkles"></i>
+              Сгенерировать гипотезы
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="page" id="page-docs">
+
+      <div class="docs-toolbar">
+        <div class="docs-search">
+          <i data-lucide="search"></i>
+          <input type="text" id="docsSearch" placeholder="Поиск по имени, типу или источнику…" />
+        </div>
+        <div class="docs-filter">
+          <button class="docs-chip active" data-filter="all">Все</button>
+          <button class="docs-chip" data-filter="indexed">Распознаны</button>
+          <button class="docs-chip" data-filter="pending">В очереди</button>
+          <button class="docs-chip" data-filter="failed">С ошибкой</button>
+        </div>
+      </div>
+
+      <div class="docs-summary">
+        <div class="docs-sum-tile"><div class="docs-sum-num" id="docsSumTotal">—</div><div class="docs-sum-label">Документов всего</div></div>
+        <div class="docs-sum-tile"><div class="docs-sum-num accent" id="docsSumRecognized">—</div><div class="docs-sum-label">Распознаны · в индексе</div></div>
+        <div class="docs-sum-tile"><div class="docs-sum-num primary" id="docsSumPages">—</div><div class="docs-sum-label">Чанков в корпусе</div></div>
+        <div class="docs-sum-tile"><div class="docs-sum-num primary" id="docsSumHyps">—</div><div class="docs-sum-label">Привязано гипотез</div></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Документ</th>
+              <th>Тип</th>
+              <th>OCR</th>
+              <th>Чанков</th>
+              <th>Статус</th>
+              <th>Гипотезы</th>
+              <th>Загружен</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="docsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    
+    <section class="page" id="page-hypotheses">
+
+      <div class="toolbar">
+        <h2 class="toolbar-title">Сгенерированные гипотезы</h2>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Гипотеза</th>
+              <th>Новизна</th>
+              <th>Реализуемость</th>
+              <th>Эффект</th>
+              <th>Риск</th>
+              <th>Комплексная оценка</th>
+            </tr>
+          </thead>
+          <tbody id="hypotheses-tbody">
+            <tr><td colspan="7">Нет данных</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    
+    <section class="page page-graph-page" id="page-graph">
+
+      <div class="graph-toolbar">
+        <div class="graph-info-bar" style="flex:1">
+          <div class="graph-stats">
+            <div class="graph-stat">Сущностей: <strong id="graph-nodes-count">0</strong></div>
+            <div class="graph-stat">Связей: <strong id="graph-edges-count">0</strong></div>
+            <div class="graph-stat">Гипотез: <strong id="graph-hyps-count">0</strong></div>
+          </div>
+          <div style="font-size:12px;color:var(--muted)">Клик — показать связи узла. Клик по фону — сброс.</div>
+        </div>
+        <button class="btn btn-ghost" id="graph-refresh-btn">
+          <i data-lucide="refresh-cw"></i>
+          Обновить
+        </button>
+        <button class="btn btn-ghost" id="graph-export-btn">
+          <i data-lucide="download"></i>
+          Экспорт
+        </button>
+      </div>
+
+      <div class="cy-wrapper">
+        <div id="cy" class="cytoscape-canvas"></div>
+        <div class="graph-legend" id="graph-legend" style="display:none;">
+          <div class="legend-title">Легенда</div>
+          <div class="legend-items">
+            <div class="legend-item"><div class="legend-dot" style="background:#0077bc"></div> Материалы</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Элементы</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;border-radius:2px;"></div> Процессы</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6;transform:rotate(45deg)"></div> Свойства</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div> Оборудование</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#e03e3e;border-radius:3px;"></div> Гипотезы</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty" id="graph-empty">
+        <div class="empty-icon">
+          <i data-lucide="network"></i>
+        </div>
+        <div class="empty-title">Граф ещё не построен</div>
+        <div class="empty-text">Сгенерируйте гипотезы на главной странице, затем нажмите «Обновить» для построения графа знаний.</div>
+      </div>
+    </section>
+
+    
+    <section class="page" id="page-export">
+
+      <div class="export-list">
+        <div class="export-item" data-format="csv">
+          <div class="export-icon">CSV</div>
+          <div class="export-body">
+            <h4>Таблица гипотез · CSV</h4>
+            <p>Формулировка, все 4 критерия, комплексная оценка и уверенность. Одна строка на гипотезу — удобно для Excel.</p>
+          </div>
+        </div>
+        <div class="export-item" data-format="xlsx">
+          <div class="export-icon">XLSX</div>
+          <div class="export-body">
+            <h4>Полный отчёт · Excel</h4>
+            <p>Два листа: гипотезы + детальный ход рассуждений с источниками и цитатами.</p>
+          </div>
+        </div>
+        <div class="export-item" data-format="jsonl">
+          <div class="export-icon">JSON</div>
+          <div class="export-body">
+            <h4>Сырые данные · JSONL</h4>
+            <p>Структурированные данные для интеграции с внутренними системами. Включает цепочки рассуждений.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="lastRunCard" style="display:none;">
+        <div class="card-title">Последний запуск</div>
+        <div class="run-meta" id="lastRunMeta">
+          <div class="row"><span class="k">ID:</span><span class="v run-id" data-lr-field="id">—</span></div>
+          <div class="row"><span class="k">Проблема:</span><span class="v" data-lr-field="problem">—</span></div>
+          <div class="row"><span class="k">Гипотез:</span><span class="v" data-lr-field="hyps">—</span></div>
+          <div class="row"><span class="k">Дата:</span><span class="v" data-lr-field="date">—</span></div>
+          <div class="row"><span class="k">Стратегия:</span><span class="v" data-lr-field="strategy">—</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    window.__HF_CONFIG__ = { API_BASE: '/api/v1' };
+  </script>
+  <script defer src="js/app.js"></script>
+  <script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+    window.addEventListener('load', () => lucide.createIcons());
+  </script>
+</body>
+</html>

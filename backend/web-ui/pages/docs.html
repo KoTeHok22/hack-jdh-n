@@ -1,0 +1,39 @@
+<div class="docs-toolbar">
+  <div class="docs-search">
+      <i data-lucide="search"></i>
+    <input type="text" id="docsSearch" placeholder="Поиск по имени, типу или источнику…" />
+  </div>
+  <div class="docs-filter">
+    <button class="docs-chip active" data-filter="all">Все</button>
+    <button class="docs-chip" data-filter="indexed">Распознаны</button>
+    <button class="docs-chip" data-filter="pending">В очереди</button>
+    <button class="docs-chip" data-filter="failed">С ошибкой</button>
+  </div>
+</div>
+
+<div class="docs-summary">
+  <div class="docs-sum-tile"><div class="docs-sum-num" id="docsSumTotal">—</div><div class="docs-sum-label">Документов всего</div></div>
+  <div class="docs-sum-tile"><div class="docs-sum-num accent" id="docsSumRecognized">—</div><div class="docs-sum-label">Распознаны · в индексе</div></div>
+  <div class="docs-sum-tile"><div class="docs-sum-num primary" id="docsSumPages">—</div><div class="docs-sum-label">Чанков в корпусе</div></div>
+  <div class="docs-sum-tile"><div class="docs-sum-num primary" id="docsSumHyps">—</div><div class="docs-sum-label">Привязано гипотез</div></div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Документ</th>
+        <th>Тип</th>
+        <th>OCR</th>
+        <th>Чанков</th>
+        <th>Статус</th>
+        <th>Гипотезы</th>
+        <th>Загружен</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="docsTableBody"></tbody>
+  </table>
+</div>
+
+<script>lucide.createIcons();</script>

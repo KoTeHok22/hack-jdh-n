@@ -1,0 +1,105 @@
+<div class="flow-steps">
+  <div class="flow-step" id="step1"><div class="flow-num"><span>1</span></div>Загрузка документов</div>
+  <div class="flow-step" id="step2"><div class="flow-num"><span>2</span></div>Параметры генерации</div>
+  <div class="flow-step" id="step3"><div class="flow-num"><span>3</span></div>Ранжирование гипотез</div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat"><div class="stat-label">Документов загружено</div><div class="stat-value" id="docsCountStat">—</div><div class="stat-trend" id="docsTrend"></div></div>
+  <div class="stat"><div class="stat-label">Запусков генерации</div><div class="stat-value" id="runsCountStat">—</div><div class="stat-trend" id="runsTrend"></div></div>
+  <div class="stat"><div class="stat-label">Гипотез сгенерировано</div><div class="stat-value" id="hypsCountStat">—</div><div class="stat-trend" id="hypsTrend"></div></div>
+  <div class="stat"><div class="stat-label">OCR-провайдеров</div><div class="stat-value" id="ocrCountStat">0</div><div class="stat-trend" id="ocrTrend">доступно</div></div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">
+      <span class="card-title-icon primary"><i data-lucide="upload"></i></span>
+      Загрузка документов
+    </div>
+    <div class="dropzone" id="upload-dropzone">
+      <i data-lucide="upload" style="width:40px;height:40px;"></i>
+      <div class="dropzone-title">Перетащите файлы сюда или кликните</div>
+      <div class="dropzone-sub">PDF, DOCX, XLSX, CSV, TXT, MD · до 200 МБ на файл</div>
+      <input type="file" id="file-input" multiple accept=".pdf,.docx,.xlsx,.csv,.txt,.md" style="display:none;">
+    </div>
+    <div class="file-list" id="file-list" style="display:none;"></div>
+    <div class="field" style="margin-top:var(--space-2);">
+      <label class="label">Тип документа</label>
+      <select class="select" id="doc-type">
+        <option value="textbook">Учебник</option>
+        <option value="report">Научный отчёт</option>
+        <option value="patent">Патент</option>
+        <option value="technical">Техническая документация</option>
+        <option value="other">Другое</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="label">OCR-провайдер</label>
+      <select class="select" id="ocr-provider">
+        <option value="auto">Авто (определит система)</option>
+        <option value="mistral">Mistral OCR</option>
+        <option value="glm">GLM-OCR</option>
+        <option value="paddle">PaddleOCR</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="upload-btn" disabled>
+        <i data-lucide="upload"></i>
+        Загрузить и индексировать
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="card-title-icon accent"><i data-lucide="sparkles"></i></span>
+      Генерация гипотез
+    </div>
+    <div class="field">
+      <label class="label">Формулировка проблемы</label>
+      <textarea class="textarea" id="problem-text" placeholder="Например: увеличить извлечение никеля из пентландита на 15–20% без капитальных затрат…"></textarea>
+    </div>
+    <div class="field">
+      <label class="label">Количество гипотез</label>
+      <input class="input" id="hypothesis-count" type="number" min="3" max="15" value="8" />
+    </div>
+    <div class="field">
+      <label class="label">Режим стратегии поиска</label>
+      <select class="select" id="strategy">
+        <option value="auto">Авто</option>
+        <option value="novelty">Максимальная новизна</option>
+        <option value="feasibility">Максимальная реализуемость</option>
+        <option value="impact">Максимальный эффект</option>
+        <option value="balanced">Сбалансированный</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="label">Модель</label>
+      <div class="model-toggle" id="model-toggle">
+        <label class="model-option active">
+          <input type="radio" name="gen-model" value="deepseek-v4-flash" checked />
+          <span>Быстрая</span>
+          <small>deepseek-v4-flash</small>
+        </label>
+        <label class="model-option">
+          <input type="radio" name="gen-model" value="deepseek-v4-pro" />
+          <span>Стандарт</span>
+          <small>deepseek-v4-pro</small>
+        </label>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-accent" id="generate-btn">
+        <i data-lucide="sparkles"></i>
+        Сгенерировать гипотезы
+      </button>
+    </div>
+    <div class="gen-warning" id="gen-warning" style="display:none;">
+      <i data-lucide="alert-triangle" style="width:16px;height:16px;flex-shrink:0;"></i>
+      <span>Не обновляйте и не закрывайте страницу во время генерации — процесс идёт на сервере и может занимать 1–2 минуты.</span>
+    </div>
+  </div>
+</div>
+
+<script>lucide.createIcons();</script>

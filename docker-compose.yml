@@ -1,0 +1,86 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/hypothesis_db
+      - QDRANT_URL=http://qdrant:6333
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_API_BASE=${LLM_API_BASE:-https://api.deepseek.com}
+      - LLM_MODEL=${LLM_MODEL:-deepseek-v4-pro}
+      - YANDEX_API_KEY=${YANDEX_API_KEY}
+      - YANDEX_FOLDER_ID=${YANDEX_FOLDER_ID}
+      - EMBEDDING_API_KEY=${EMBEDDING_API_KEY}
+      - EMBEDDING_API_BASE=${EMBEDDING_API_BASE:-https://foundation-models.api.cloud.ru/v1}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-Qwen/Qwen3-Embedding-0.6B}
+      - EMBEDDING_DIM=${EMBEDDING_DIM:-1024}
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+      - OCR_PROVIDER=${OCR_PROVIDER:-mistral}
+      - GLM_OCR_BASE_URL=http://glm-ocr:8080
+      - GLM_OCR_MODEL=zai-org/GLM-OCR
+      - GLM_OCR_DPI=200
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: hypothesis_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d hypothesis_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  glm-ocr:
+    profiles: ["gpu"]
+    image: vllm/vllm-openai:nightly
+    ports:
+      - "8080:8080"
+    environment:
+      - HF_TOKEN=${HF_TOKEN}
+    volumes:
+      - hf_cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: >
+      --model zai-org/GLM-OCR
+      --host 0.0.0.0
+      --port 8080
+      --allowed-local-media-path /
+      --max-model-len 8192
+    shm_size: "8g"
+    restart: on-failure
+
+volumes:
+  qdrant_data:
+  pg_data:
+  hf_cache:

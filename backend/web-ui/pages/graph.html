@@ -1,0 +1,125 @@
+<div class="graph-container">
+  <div class="graph-toolbar">
+    <div class="graph-info-bar" style="flex:1">
+      <div class="graph-stats">
+        <div class="graph-stat">Сущностей: <strong id="graph-nodes-count">0</strong></div>
+        <div class="graph-stat">Связей: <strong id="graph-edges-count">0</strong></div>
+        <div class="graph-stat">Гипотез: <strong id="graph-hyps-count">0</strong></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">Клик — показать связи узла. Клик по фону — сброс.</div>
+    </div>
+    <button id="graph-refresh-btn" class="btn btn-ghost" title="Обновить граф">
+      <i data-lucide="refresh-cw"></i>
+      Обновить
+    </button>
+    <button id="graph-export-btn" class="btn btn-ghost" title="Экспортировать граф">
+      <i data-lucide="download"></i>
+      Экспорт
+    </button>
+  </div>
+  
+  <div class="cy-wrapper">
+    <div id="cy" class="cytoscape-canvas"></div>
+    <div id="graph-legend" class="graph-legend" style="display:none;">
+      <div class="legend-title">Легенда</div>
+      <div class="legend-items">
+        <div class="legend-item"><div class="legend-dot" style="background:#0077bc"></div> Материалы</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Элементы</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;border-radius:2px;"></div> Процессы</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6;transform:rotate(45deg)"></div> Свойства</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div> Оборудование</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#e03e3e;border-radius:3px;"></div> Гипотезы</div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="graph-empty" class="empty-state" style="display: flex;">
+    <div class="empty-icon"></div>
+    <div class="empty-title">Граф знаний</div>
+    <div class="empty-sub">Загрузите документы и сгенерируйте гипотезы, чтобы увидеть связи между сущностями</div>
+  </div>
+</div>
+
+<style>
+.graph-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 16px;
+}
+
+.graph-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cy-wrapper {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 200px);
+  min-height: 500px;
+}
+
+.cy-wrapper #cy {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: grab;
+  z-index: 1;
+}
+
+.cy-wrapper #cy:active {
+  cursor: grabbing;
+}
+
+.graph-legend {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  font-size: 12px;
+  z-index: 100;
+}
+
+.legend-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--fg);
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fg-soft);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
+.graph-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.graph-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+</style>
