@@ -21,6 +21,16 @@ async def init_qdrant():
                 distance=Distance.COSINE,
             ),
         )
+    
+    fallback_collection = f"{COLLECTION_NAME}_fallback"
+    if fallback_collection not in collections:
+        await client.create_collection(
+            collection_name=fallback_collection,
+            vectors_config=VectorParams(
+                size=settings.embedding_fallback_dim,
+                distance=Distance.COSINE,
+            ),
+        )
 
 
 def get_qdrant() -> AsyncQdrantClient:

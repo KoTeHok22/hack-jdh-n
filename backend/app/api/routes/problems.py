@@ -21,6 +21,7 @@ class ProblemCreate(BaseModel):
     document_ids: Optional[list[str]] = None
     num_hypotheses: int = 8
     model: Optional[str] = None
+    mode: str = "single"
     
     def get_statement(self) -> str:
         return self.statement or self.problem_description or ""
@@ -32,6 +33,7 @@ class ProblemResponse(BaseModel):
     parsed_problem: dict
     hypotheses: list[dict]
     context_chunks_count: int
+    references: list[dict] = []
 
 
 @router.get("")
@@ -116,6 +118,7 @@ async def create_problem(request: ProblemCreate):
         document_ids=request.document_ids,
         num_hypotheses=request.num_hypotheses,
         model=request.model,
+        mode=request.mode,
     )
 
     try:
@@ -173,4 +176,5 @@ async def create_problem(request: ProblemCreate):
         parsed_problem=result["parsed_problem"],
         hypotheses=hypotheses_with_scores,
         context_chunks_count=len(result.get("context_chunks", [])),
+        references=result.get("references", []),
     )

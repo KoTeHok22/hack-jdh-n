@@ -34,6 +34,16 @@ class Settings(BaseSettings):
     glm_ocr_model: str = "zai-org/GLM-OCR"
     glm_ocr_dpi: int = 200
     upload_dir: str = "/app/data/uploads"
+    
+    embedding_provider: str = "auto"
+    embedding_fallback_dim: int = 384
+    
+    llm_ensemble_enabled: bool = False
+    llm_provider_2: str = "openai"
+    llm_api_key_2: str = ""
+    llm_api_base_2: str = "https://api.openai.com/v1"
+    llm_model_2: str = "gpt-4o-mini"
+    llm_judge_temperature: float = 0.3
 
     @field_validator("database_url", mode="before")
     @classmethod

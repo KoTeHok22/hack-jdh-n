@@ -44,7 +44,6 @@ METALLURGY_KEYWORDS = {
 
 
 def _extract_keywords_from_text(text: str) -> tuple[List[Dict], List[Dict]]:
-    """Простое извлечение сущностей на основе ключевых слов."""
     entities = []
     found = set()
     
@@ -66,7 +65,6 @@ def _build_graph_from_hypotheses(
     problem_statement: str,
     hypotheses: List[Dict],
 ) -> Dict[str, Any]:
-    """Построение графа из проблемы и гипотез без LLM."""
     nodes_map = {}
     edges = []
     

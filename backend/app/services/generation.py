@@ -3,7 +3,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from app.services.search import hybrid_search, build_context
+from app.services.search import hybrid_search, advanced_hybrid_search, build_context_with_refs
 from app.services.llm_client import get_llm_client
 
 logger = logging.getLogger(__name__)
@@ -249,16 +249,21 @@ async def run_full_generation(
     document_ids: list = None,
     num_hypotheses: int = 8,
     model: str = None,
+    mode: str = "single",
 ) -> dict:
-    search_results = await hybrid_search(statement, top_k=15)
-    context = build_context(search_results)
+    search_results = await advanced_hybrid_search(statement, top_k=15, use_diversification=True)
+    context, refs = build_context_with_refs(search_results)
 
     parsed_problem = await parse_problem(statement, context, model=model)
 
-    hypotheses = await generate_hypotheses(statement, parsed_problem, context, num_hypotheses, model=model)
+    if mode == "ensemble":
+        from app.services.ensemble import ensemble_generate
+        hypotheses = await ensemble_generate(statement, parsed_problem, context, num_hypotheses, model=model)
+    else:
+        hypotheses = await generate_hypotheses(statement, parsed_problem, context, num_hypotheses, model=model)
 
     if not hypotheses:
-        return {"parsed_problem": parsed_problem, "hypotheses": [], "context_chunks": search_results}
+        return {"parsed_problem": parsed_problem, "hypotheses": [], "context_chunks": search_results, "references": refs}
 
     scores = await score_hypotheses(hypotheses, statement, context, model=model)
 
@@ -296,4 +301,5 @@ async def run_full_generation(
         "parsed_problem": parsed_problem,
         "hypotheses": scored_hypotheses,
         "context_chunks": search_results,
+        "references": refs,
     }

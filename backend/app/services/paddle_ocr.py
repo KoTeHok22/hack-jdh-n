@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 async def ocr_pdf_file_paddle(file_path: str) -> str:
-    """OCR PDF using PaddleOCR"""
     try:
         from paddleocr import PaddleOCR
     except ImportError:

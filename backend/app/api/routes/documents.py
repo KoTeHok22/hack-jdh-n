@@ -164,7 +164,6 @@ async def list_ocr_providers():
 
 @router.get("")
 async def list_documents():
-    """List all documents in the corpus"""
     async with get_session() as session:
         stmt = select(Document).order_by(Document.created_at.desc())
         result = await session.execute(stmt)
@@ -428,7 +427,6 @@ async def get_raw_ocr_text(
     file: UploadFile = File(...),
     ocr_provider: Literal["mistral", "glm", "paddle"] = Query(...),
 ):
-    """Get raw OCR text without chunking/embedding"""
     from app.services.mistral_ocr import ocr_pdf_file
     from app.services.glm_ocr import ocr_pdf_file_glm
     from app.services.paddle_ocr import ocr_pdf_file_paddle

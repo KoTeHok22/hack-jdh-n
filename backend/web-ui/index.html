@@ -196,6 +196,23 @@
             </select>
           </div>
 
+          <div class="form-group">
+            <label class="form-label">Режим генерации</label>
+            <select id="generation-mode" class="select">
+              <option value="standard">Стандартный (1 модель)</option>
+              <option value="ensemble">Ансамбль (2 модели + судья)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Embeddings</label>
+            <select id="embedding-mode" class="select">
+              <option value="auto">Авто (API с fallback)</option>
+              <option value="api">Cloud.ru API</option>
+              <option value="local">Локальные (fastembed)</option>
+            </select>
+          </div>
+
           <div class="btn-row">
             <button class="btn btn-accent" id="generate-btn">
               <i data-lucide="sparkles"></i>

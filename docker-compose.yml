@@ -2,7 +2,9 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8000:8000"
+      - "8001:8000"
+    volumes:
+      - hf_cache:/root/.cache
     environment:
       - DATABASE_URL=postgresql://user:pass@postgres:5432/hypothesis_db
       - QDRANT_URL=http://qdrant:6333
@@ -16,11 +18,19 @@ services:
       - EMBEDDING_API_BASE=${EMBEDDING_API_BASE:-https://foundation-models.api.cloud.ru/v1}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL:-Qwen/Qwen3-Embedding-0.6B}
       - EMBEDDING_DIM=${EMBEDDING_DIM:-1024}
+      - EMBEDDING_PROVIDER=${EMBEDDING_PROVIDER:-auto}
+      - EMBEDDING_FALLBACK_DIM=${EMBEDDING_FALLBACK_DIM:-384}
+      - LLM_ENSEMBLE_ENABLED=${LLM_ENSEMBLE_ENABLED:-false}
+      - LLM_PROVIDER_2=${LLM_PROVIDER_2:-openai}
+      - LLM_API_KEY_2=${LLM_API_KEY_2}
+      - LLM_API_BASE_2=${LLM_API_BASE_2:-https://api.openai.com/v1}
+      - LLM_MODEL_2=${LLM_MODEL_2:-gpt-4o-mini}
       - MISTRAL_API_KEY=${MISTRAL_API_KEY}
       - OCR_PROVIDER=${OCR_PROVIDER:-mistral}
       - GLM_OCR_BASE_URL=http://glm-ocr:8080
       - GLM_OCR_MODEL=zai-org/GLM-OCR
       - GLM_OCR_DPI=200
+      - HF_TOKEN=${HF_TOKEN}
     depends_on:
       postgres:
         condition: service_healthy
@@ -28,14 +38,15 @@ services:
         condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 15s
+      timeout: 120s
+      retries: 8
+      start_period: 60s
 
   qdrant:
     image: qdrant/qdrant:latest
     ports:
-      - "6333:6333"
+      - "6334:6333"
     volumes:
       - qdrant_data:/qdrant/storage
 
@@ -46,7 +57,7 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: pass
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:

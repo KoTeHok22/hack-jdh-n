@@ -92,13 +92,17 @@ async def ingest_file(
 
     _emit("indexing", 72, "Запись в Qdrant...")
     client = get_qdrant()
+    fallback_dim = get_settings().embedding_fallback_dim
+    collection = COLLECTION_NAME
+    if embeddings and len(embeddings[0]) == fallback_dim:
+        collection = f"{COLLECTION_NAME}_fallback"
     batch_size = 100
     total = len(points)
     for batch_idx, i in enumerate(range(0, total, batch_size)):
         batch = points[i:i + batch_size]
         from qdrant_client.models import PointStruct
         await client.upsert(
-            collection_name=COLLECTION_NAME,
+            collection_name=collection,
             points=[PointStruct(**p) for p in batch],
         )
         pct = 72 + int(23 * (batch_idx + 1) * batch_size / total)

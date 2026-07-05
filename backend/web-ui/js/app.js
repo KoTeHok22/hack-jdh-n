@@ -327,6 +327,7 @@ async function init() {
     const problemInput = document.getElementById('problem-text');
     const hypothesisCount = document.getElementById('hypothesis-count');
     const strategy = document.getElementById('strategy');
+    const generationMode = document.getElementById('generation-mode');
     const modelToggle = document.getElementById('model-toggle');
     const genWarning = document.getElementById('gen-warning');
 
@@ -380,6 +381,7 @@ async function init() {
           num_hypotheses: hypothesisCount ? parseInt(hypothesisCount.value) : 5,
           strategy: strategy ? strategy.value : 'auto',
           model: selectedModel,
+          mode: generationMode ? generationMode.value : 'standard',
         };
 
         const problemResponse = await apiRequest('/problems', {
@@ -1120,12 +1122,35 @@ async function init() {
     window.cyInstance = cy;
   }
 
+  function setupEmbeddingSelector() {
+    const select = document.getElementById('embedding-mode');
+    if (!select) return;
+
+    apiRequest('/settings/embedding').then(res => {
+      select.value = res.provider || 'auto';
+    }).catch(() => {});
+
+    select.addEventListener('change', async () => {
+      try {
+        await apiRequest('/settings/embedding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider: select.value }),
+        });
+        showSuccess(`Embeddings: ${select.options[select.selectedIndex].text}`);
+      } catch (e) {
+        showError('Не удалось сменить embeddings провайдер');
+      }
+    });
+  }
+
   const isHealthy = await checkHealth();
   if (isHealthy) {
     setupNavigation();
     setupDropzone();
     setupUpload();
     setupGeneration();
+    setupEmbeddingSelector();
     setupDocsFilter();
     setupExportList();
     setupDocActions();
